@@ -6,46 +6,47 @@ import axios from 'axios';
 
 
 function App() {
-  const [todo, setTodo] = useState("")
-  const [description, setDescription] = useState("") 
-  const [todos, setTodos] = useState([])
-  const [showFinished, setshowFinished] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [expandedTodoId, setExpandedTodoId] = useState(null)
+  const [todo, setTodo] = useState("") // Stores the current todo input
+  const [description, setDescription] = useState("") // Stores the current description input
+  const [todos, setTodos] = useState([]) // Stores the list of todos
+  const [showFinished, setshowFinished] = useState(true) // Controls whether to show finished todos
+  const [searchTerm, setSearchTerm] = useState("") // Stores the current search term
+  const [expandedTodoId, setExpandedTodoId] = useState(null) // Stores the id of the todo to expand
 
-  
+  // Fetch todos from the server on component mount
   useEffect(() => {
     axios.get('http://localhost:3000/todos/')
-    .then(response=> {
-      // Ensure the response is an array
-      if (Array.isArray(response.data)) {
-        setTodos(response.data);
-      }else if (data && data.id) {
-        // If the response is a single object, handle it as needed
-        setTodos([data]);} 
-      else {
-        console.error("Response is not an array", response.data);
-      }
-    })
-    .catch(err=>console.log(err))
+      .then(response => {
+        // Ensure the response is an array
+        if (Array.isArray(response.data)) {
+          setTodos(response.data);
+        } else if (data && data.id) {
+          // If the response is a single object, handle it as needed
+          setTodos([data]);
+        }
+        else {
+          console.error("Response is not an array", response.data);
+        }
+      })
+      .catch(err => console.log(err))
   }, [])
-  
 
-  const handleEdit =(e,id)=>{
+  // Handle editing a todo
+  const handleEdit = (e, id) => {
     e.preventDefault();
-    let t= todos.filter(i=>i.id === id)
+    let t = todos.filter(i => i.id === id)
     setTodo(t[0].todo)
     setDescription(t[0].description)
-    let newTodos =todos.filter(item=>{
-      return item.id!==id
+    let newTodos = todos.filter(item => {
+      return item.id !== id
     });
-    axios.delete('http://localhost:3000/todos/'+id)
-    .then(response=>console.log(response.data))
-    .catch(err=>console.log(err))
-    
-    axios.put('http://localhost:3000/todos/'+id, newTodos)
-    .then(response=>setTodos(response.data))
-    .catch(err=>console.log(err))
+    axios.delete('http://localhost:3000/todos/' + id)
+      .then(response => console.log(response.data))
+      .catch(err => console.log(err))
+
+    axios.put('http://localhost:3000/todos/' + id, newTodos)
+      .then(response => setTodos(response.data))
+      .catch(err => console.log(err))
     setTodos(newTodos)
     // saveToLS();
 
@@ -54,139 +55,145 @@ function App() {
   }
 
 
-
-  const handleDelete =(e,id)=>{
+  // Handle deleting a todo
+  const handleDelete = (e, id) => {
     e.preventDefault();
-    let newTodos =todos.filter(item=>{
-      return item.id!==id
+    let newTodos = todos.filter(item => {
+      return item.id !== id
     });
 
-    axios.delete('http://localhost:3000/todos/'+id)
-    .then(response=>console.log(response.data))
-    .catch(err=>console.log(err))
-   
+    axios.delete('http://localhost:3000/todos/' + id)
+      .then(response => console.log(response.data))
+      .catch(err => console.log(err))
+
     setTodos(newTodos)
     // saveToLS();
   }
 
-
-  const handleChange =(e)=>{
+  // Handle changes to the todo input
+  const handleChange = (e) => {
     setTodo(e.target.value)
-    
+
   }
 
-  const handleDescriptionChange = (e) => { 
-    setDescription(e.target.value) 
+  // Handle changes to the description input
+  const handleDescriptionChange = (e) => {
+    setDescription(e.target.value)
   }
 
-  const handleAdd =(e)=>{ 
+  // Handle adding a new todo
+  const handleAdd = (e) => {
     e.preventDefault();
-    
+
     let t = { id: uuidv4(), todo, isCompleted: false, description, timestamp: new Date().toLocaleString() }
-    setTodos([...todos, t]) 
-    console.log(t)
+    setTodos([...todos, t])
     axios.post('http://localhost:3000/todos/', t)
-    .then(response=>{
-      // Ensure the response is an array
-      if (Array.isArray(response.data)) {
-        setTodos([...todos, response.data]);
-      }else if (data && data.id) {
-        setTodos([...todos, data]);} 
-      else {
-        console.error("Response is not an array", response.data);
-      }
-    })
-    .catch(err=>console.log(err))
+      .then(response => {
+        // Ensure the response is an array
+        if (Array.isArray(response.data)) {
+          setTodos([...todos, response.data]);
+        } else if (data && data.id) {
+          setTodos([...todos, data]);
+        }
+        else {
+          console.error("Response is not an array", response.data);
+        }
+      })
+      .catch(err => console.log(err))
     setTodo("")
-    setDescription("") 
+    setDescription("")
     // saveToLS(); 
   }
 
-  const handleCheckbox=(e) => {
-    let id =  e.target.name;
-    let index=todos.findIndex(item=>{
-      return item.id ===id;
+  // Handle checkbox changes for marking todos as completed
+  const handleCheckbox = (e) => {
+    let id = e.target.name;
+    let index = todos.findIndex(item => {
+      return item.id === id;
     })
-    let newTodos =[...todos];
+    let newTodos = [...todos];
     newTodos[index].isCompleted = !newTodos[index].isCompleted;
     setTodos(newTodos)
     // saveToLS();
   }
-  
 
-  const toggleFinished =(params) => {
+  // Toggle the visibility of completed todos
+  const toggleFinished = (params) => {
     setshowFinished(!showFinished)
   }
-  
 
-  const handleSearch = (e) => { 
-    setSearchTerm(e.target.value) 
+  // Handle changes to the search input
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value)
   }
 
-  const toggleExpand = (id) => { 
-    setExpandedTodoId(expandedTodoId === id ? null : id); 
+  // Toggle the expansion of a todo item
+  const toggleExpand = (id) => {
+    setExpandedTodoId(expandedTodoId === id ? null : id);
   }
 
-  const filteredTodos = Array.isArray(todos) ? todos.filter(item => item.todo.toLowerCase().includes(searchTerm.toLowerCase())) : [];  
+  // Filter todos based on search term
+  const filteredTodos = Array.isArray(todos) ? todos.filter(item => item.todo.toLowerCase().includes(searchTerm.toLowerCase())) : [];
 
 
 
 
   return (
     <>
-    <Navbar/>
+      <Navbar />
       <div className='flex justify-center '>
         <div className="w-[50vw] bg-purple-400 min-h-screen m-8 p-10 rounded-lg ">
           <div className='flex justify-center text-2xl font-extrabold m-3'>
-           <h1 >Manage your todos at one place</h1>
+            <h1 >Manage your todos at one place</h1>
           </div>
           <div className='text-xl font-bold m-3'>
-           <h2>Add a Todo</h2>
+            <h2>Add a Todo</h2>
 
           </div>
-           <div className='gap-4 flex'>
+          <div className='gap-4 flex'>
             <input onChange={handleChange} value={todo} type="text" className='w-[35vw] rounded-xl p-1' />
             <input onChange={handleDescriptionChange} value={description} type="text" className='w-[35vw] rounded-xl p-1' placeholder="Description" />
-            <button onClick={handleAdd} disabled={todo.length<3} className='bg-violet-700 rounded-md w-20 text-white hover:bg-violet-500  hover:border-2'>Save</button>
-           </div>
-           <div className='flex gap-2 my-3'>
-           <input onChange={toggleFinished} type="checkbox" checked={showFinished}/><p> Show Finished</p>
-           </div>
+            <button onClick={handleAdd} disabled={todo.length < 3} className='bg-violet-700 rounded-md w-20 text-white hover:bg-violet-500  hover:border-2'>Save</button>
+          </div>
+          <div className='flex gap-2 my-3'>
+            <input onChange={toggleFinished} type="checkbox" checked={showFinished} /><p> Show Finished</p>
+          </div>
 
-           <hr />
+          <hr />
 
-           <h2 className='font-bold text-xl my-4'>Your Todos</h2>
+          <h2 className='font-bold text-xl my-4'>Your Todos</h2>
 
-           <div className='flex flex-col gap-3'>
-           <input onChange={handleSearch} value={searchTerm} type="text" placeholder="Search todos..." className='w-[35vw] rounded-xl p-1 my-3' />
+          <div className='flex flex-col gap-3'>
+            <input onChange={handleSearch} value={searchTerm} type="text" placeholder="Search todos..." className='w-[35vw] rounded-xl p-1 my-3' />
 
-           {filteredTodos.length === 0 && <div>No Todos</div>}
+            {filteredTodos.length === 0 && <div>No Todos</div>}
 
-           {filteredTodos.map(item => {
+            {filteredTodos.map(item => {
 
-            
-            return (showFinished || !item.isCompleted) && (
-              <div key={item.id} className='flex flex-col w-[40vw]'> 
-                <div className='flex justify-between'>
-                  <div className='flex'>
-                    <input name={item.id} onChange={handleCheckbox} type="checkbox" checked={item.isCompleted} className='mx-3'/>
-                    <div className={item.isCompleted ? "line-through" : ""}>{item.todo}</div>
+
+              return (showFinished || !item.isCompleted) && (
+                <div key={item.id} className='flex flex-col w-[40vw]'>
+                  <div className='flex justify-between'>
+                    <div className='flex'>
+                      <input name={item.id} onChange={handleCheckbox} type="checkbox" checked={item.isCompleted} className='mx-3' />
+                      <div className={item.isCompleted ? "line-through" : ""}>{item.todo}</div>
+                    </div>
+                    <div className='flex gap-2'>
+                      <button onClick={(e) => { handleEdit(e, item.id) }} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Edit</button>
+                      <button onClick={(e) => { handleDelete(e, item.id) }} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Delete</button>
+                      <button onClick={() => toggleExpand(item.id)} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>{expandedTodoId === item.id ? 'Less info' : 'More info'}</button>
+                    </div>
                   </div>
-                  <div className='flex gap-2'>
-                    <button onClick={(e)=>{handleEdit(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Edit</button>
-                    <button onClick={(e)=>{handleDelete(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Delete</button>
-                    <button onClick={() => toggleExpand(item.id)} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>{expandedTodoId === item.id ? 'Less info' : 'More info'}</button> 
-                  </div>
+                  {expandedTodoId === item.id && (
+                    <div className='mt-2'>
+                      <p>Description: {item.description}</p>
+                      <p>Last updated: {item.timestamp}</p>
+                    </div>
+                  )}
                 </div>
-                {expandedTodoId === item.id && ( 
-                  <div className='mt-2'> 
-                    <p>Description: {item.description}</p> 
-                    <p>Last updated: {item.timestamp}</p> 
-                  </div> 
-                )} 
-              </div>
-           )})}
-           </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </>
