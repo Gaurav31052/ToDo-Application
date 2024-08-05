@@ -13,19 +13,6 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedTodoId, setExpandedTodoId] = useState(null)
 
-  // useEffect(() => {
-  //   let toString = localStorage.getItem("todos")
-  //   if(toString){
-  //     let todos =JSON.parse(localStorage.getItem("todos"))
-  //     setTodos(todos)
-  //   }
-  // }, [])
-  
-
-
-  // const saveToLS =(params) => {
-  //   localStorage.setItem("todos", JSON.stringify(todos))
-  // }
   
   useEffect(() => {
     axios.get('http://localhost:3000/todos/')

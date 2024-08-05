@@ -9,7 +9,6 @@ const navbar = () => {
         </div>
         <div className="left"><ul className="flex gap-8">
             <li>Home</li>
-            <li>Your Task</li>
             </ul></div>
       
     </div>
