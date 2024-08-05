@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import Navbar from './components/navbar'
 import { v4 as uuidv4 } from 'uuid';
 import './App.css'
+import axios from 'axios';
 
 function App() {
   const [todo, setTodo] = useState("")
+  const [description, setDescription] = useState("") 
   const [todos, setTodos] = useState([])
   const [showFinished, setshowFinished] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  
+  const [expandedTodoId, setExpandedTodoId] = useState(null)
 
   // useEffect(() => {
   //   let toString = localStorage.getItem("todos")
@@ -24,27 +26,23 @@ function App() {
   //   localStorage.setItem("todos", JSON.stringify(todos))
   // }
   
-
-  useEffect(() => {
-    fetch('/todos.json') // Added line
-      .then(response => response.json()) // Added line
-      .then(data => setTodos(data)); // Added line
-  }, [])
-
-  const saveToJSON = (newTodos) => { // Added line
-    setTodos(newTodos); // Added line
-    // Note: In a real app, you would also update the JSON file on the server here. // Added line
-  }
+  // useEffect(() => {
+  //  axios.get('http://localhost:3000/todos')
+  //  .then(res=>setTodos(res.data))
+  //  .catch(err=>console.log(err))
+  // }, [])
+  
 
   const handleEdit =(e,id)=>{
     let t= todos.filter(i=>i.id === id)
     setTodo(t[0].todo)
+    setDescription(t[0].description)
     let newTodos =todos.filter(item=>{
       return item.id!==id
     });
    
     setTodos(newTodos)
-    saveToJSON(newTodos); 
+    // saveToLS();
 
 
 
@@ -59,7 +57,7 @@ function App() {
     });
    
     setTodos(newTodos)
-    saveToJSON(newTodos);
+    // saveToLS();
   }
 
 
@@ -67,10 +65,15 @@ function App() {
     setTodo(e.target.value)
   }
 
-  const handleAdd =()=>{
-    const newTodos = [...todos, { id: uuidv4(), todo, isCompleted: false }];
-saveToJSON(newTodos);
-setTodo("")
+  const handleDescriptionChange = (e) => { 
+    setDescription(e.target.value)
+  }
+
+  const handleAdd =()=>{ 
+    setTodos([...todos, { id: uuidv4(), todo, isCompleted: false, description, timestamp: new Date().toLocaleString() }]) 
+    setTodo("")
+    setDescription("") 
+    // saveToLS(); 
   }
 
   const handleCheckbox=(e) => {
@@ -81,7 +84,7 @@ setTodo("")
     let newTodos =[...todos];
     newTodos[index].isCompleted = !newTodos[index].isCompleted;
     setTodos(newTodos)
-    saveToJSON(newTodos);
+    // saveToLS();
   }
   
 
@@ -92,6 +95,10 @@ setTodo("")
 
   const handleSearch = (e) => { 
     setSearchTerm(e.target.value) 
+  }
+
+  const toggleExpand = (id) => { 
+    setExpandedTodoId(expandedTodoId === id ? null : id); 
   }
 
   const filteredTodos = todos.filter(item => item.todo.toLowerCase().includes(searchTerm.toLowerCase())); 
@@ -113,6 +120,7 @@ setTodo("")
           </div>
            <div className='gap-4 flex'>
             <input onChange={handleChange} value={todo} type="text" className='w-[35vw] rounded-xl p-1' />
+            <input onChange={handleDescriptionChange} value={description} type="text" className='w-[35vw] rounded-xl p-1' placeholder="Description" />
             <button onClick={handleAdd} disabled={todo.length<3} className='bg-violet-700 rounded-md w-20 text-white hover:bg-violet-500  hover:border-2'>Save</button>
            </div>
            <div className='flex gap-2 my-3'>
@@ -131,20 +139,28 @@ setTodo("")
            {filteredTodos.map(item => {
 
             
-           return(showFinished || !item.isCompleted) && <div key={item.id} className='flex w-[40wv] justify-between'>
-              <div className='flex'>
-              <input name={item.id} onChange={handleCheckbox} type="checkbox" checked={item.isCompleted} className='mx-3'/>
-              <div className={item.isCompleted?"line-through":""}>{item.todo}</div>
+            return (showFinished || !item.isCompleted) && (
+              <div key={item.id} className='flex flex-col w-[40vw]'> 
+                <div className='flex justify-between'>
+                  <div className='flex'>
+                    <input name={item.id} onChange={handleCheckbox} type="checkbox" checked={item.isCompleted} className='mx-3'/>
+                    <div className={item.isCompleted ? "line-through" : ""}>{item.todo}</div>
+                  </div>
+                  <div className='flex gap-2'>
+                    <button onClick={(e)=>{handleEdit(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Edit</button>
+                    <button onClick={(e)=>{handleDelete(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Delete</button>
+                    <button onClick={() => toggleExpand(item.id)} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>{expandedTodoId === item.id ? 'Less info' : 'More info'}</button> 
+                  </div>
+                </div>
+                {expandedTodoId === item.id && ( 
+                  <div className='mt-2'> 
+                    <p>Description: {item.description}</p> 
+                    <p>Last updated: {item.timestamp}</p> 
+                  </div> 
+                )} 
               </div>
-              <div className='flex gap-2'>
-              <button onClick={(e)=>{handleEdit(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Edit</button>
-              <button onClick={(e)=>{handleDelete(e,item.id)}} className='bg-violet-700 rounded-md w-auto p-1 text-white hover:bg-violet-500  hover:border'>Delete</button>
-              </div>
-            </div>
-           
-          })}
+           )})}
            </div>
-
         </div>
       </div>
     </>

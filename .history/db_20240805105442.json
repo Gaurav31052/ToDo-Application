@@ -1,0 +1,7 @@
+{
+    "todos":[{"id":"1",
+    "todo":"helloo",
+    "description":"gfyfgfgsa",
+    "timestamp": new Dta}]
+}
+id: uuidv4(), todo, isCompleted: false, description, timestamp: new Date().toLocaleString()
