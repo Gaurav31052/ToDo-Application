@@ -151,7 +151,7 @@ function App() {
 
           </div>
           <div className='gap-4 flex'>
-            <input onChange={handleChange} value={todo} type="text" className='w-[35vw] rounded-xl p-1' />
+            <input onChange={handleChange} value={todo} type="text" className='w-[35vw] rounded-xl p-1'  placeholder="Title" />
             <input onChange={handleDescriptionChange} value={description} type="text" className='w-[35vw] rounded-xl p-1' placeholder="Description" />
             <button onClick={handleAdd} disabled={todo.length < 3} className='bg-violet-700 rounded-md w-20 text-white hover:bg-violet-500  hover:border-2'>Save</button>
           </div>
